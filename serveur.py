@@ -3,7 +3,7 @@ import json
 import datetime
 import urllib.request
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1532531812054863972/UMygn6p24bkcZEhj0xGIDG2VpzqsytWpfkS6VAj7O2CTm82En4jB9BT8OARswdXFsBfW"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
