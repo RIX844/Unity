@@ -6,9 +6,9 @@ import urllib.request
 WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
-def do_POST(self):
-if self.path == '/register':
-content_length = int(self.headers['Content-Length'])
+    def do_POST(self):
+        if self.path == '/register':
+            content_length = int(self.headers['Content-Length'])
 post_data = self.rfile.read(content_length)
 data = json.loads(post_data.decode('utf-8'))
 
