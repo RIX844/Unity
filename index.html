@@ -2,79 +2,205 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Unity RP - Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity RP - Bienvenue</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            font-family: sans-serif; 
-            background: #121212; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+        /* --- RESET & LAYOUT GLOBAL --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        /* Style général des cartes */
-        .card { 
-            background: #1e1e1e; 
-            padding: 30px; 
-            border-radius: 10px; 
-            text-align: center; 
-            width: 320px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+
+        body, html {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Empêche les barres de défilement dues à l'image */
         }
-        .hidden { display: none !important; }
-        .btn { 
-            background: #5200ee; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 10px; 
+
+        /* --- FOND D'ÉCRAN LUMINEUX (Utilisation de background.jpg) --- */
+        body {
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover; /* L'image couvre tout l'écran */
+            display: flex;
+            justify-content: center; /* Centre horizontalement */
+            align-items: center;    /* Centre verticalement */
+            position: relative;
         }
-        input { 
-            width: 100%; 
-            padding: 10px; 
-            margin: 5px 0; 
-            border-radius: 5px; 
-            border: 1px solid #333; 
-            background: #2b2b2b; 
-            color: white; 
-            box-sizing: border-box; 
+
+        /* Superposition pour améliorer la lisibilité du texte sur l'image */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.3); /* Léger voile blanc translucide */
+            z-index: 1;
         }
-        /* Fond vidéo (GTA) */
-        #videoStream { 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            object-fit: cover; 
-            z-index: -1; 
+
+        /* --- CARTE DE CONNEXION (Style épuré et moderne) --- */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95); /* Fond blanc très légèrement transparent */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Ombre portée douce */
+            text-align: center;
+            width: 380px;
+            position: relative;
+            z-index: 2; /* Au-dessus du voile blanc */
         }
+
+        .brand-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .brand-title .rp {
+            color: #e74c3c; /* Le 'RP' en rouge */
+        }
+
+        .connection-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* --- FORMULAIRE --- */
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db; /* Bordure bleue au focus */
+        }
+
+        /* --- BOUTON --- */
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db; /* Un bleu professionnel, non violent */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98); /* Effet d'enfoncement */
+        }
+
+        /* --- COORDONNÉES OFFICIELLES (Bas à droite, style discret) --- */
+        .official-footer {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            text-align: right;
+            color: rgba(0, 0, 0, 0.7); /* Texte sombre et semi-transparent */
+            z-index: 3;
+            font-size: 14px;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.5); /* Léger fond pour le contraste */
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .footer-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .footer-link {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+            color: #e74c3c;
+        }
+
+        /* --- RESPONSIVE (Adaptation mobile) --- */
+        @media (max-width: 600px) {
+            .login-card {
+                width: 90%;
+                padding: 30px;
+            }
+            .brand-title { font-size: 28px; }
+            .official-footer { font-size: 12px; padding: 5px; bottom: 10px; right: 10px; }
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- Fond Vidéo -->
-    <video id="videoStream" autoplay muted loop playsinline class="hidden"></video>
+    <!-- Carte de Connexion Centrée -->
+    <div class="login-card">
+        <h1 class="brand-title">UNITY <span class="rp">RP</span></h1>
+        <p class="connection-text">CONNEXION</p>
 
-    <!-- Écran Principal -->
-    <div id="mainCard" class="card">
-        <h1>Unity RP</h1>
-        <p>Récupérer 300 000 RP</p>
-        <button id="joinBtn" class="btn">Rejoindre le jeu</button>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Entrez votre pseudo" required>
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Mot de passe</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="login-btn">Se connecter</button>
+        </form>
     </div>
 
-    <!-- Écran de Connexion (Caché au départ) -->
-    <div id="loginCard" class="card hidden">
-        <h2>Connexion</h2>
-        <input type="text" id="username" placeholder="Nom d'utilisateur">
-        <input type="password" id="password" placeholder="Mot de passe">
-        <button id="loginBtn" class="btn">Se connecter</button>
+    <!-- Coordonnées Officielles (Bas à droite) -->
+    <div class="official-footer">
+        <div class="footer-title">COORDONNÉES OFFICIELLES</div>
+        Nom du Serveur : Unity Roleplay<br>
+        Site Web : <a href="https://unityrp.com" class="footer-link">unityrp.com</a><br>
+        Discord : <a href="https://discord.gg/unityrp" class="footer-link">discord.gg/unityrp</a><br>
+        Support : <a href="mailto:support@unityrp.com" class="footer-link">support@unityrp.com</a>
     </div>
 
-    <!-- Le JavaScript va ici (voir bloc suivant) -->
+    <!-- Scripts de gestion de formulaire (Exemple fonctionnel vide) -->
+    <script>
+        // Ce script écoute la soumission du formulaire pour éviter le rechargement de page
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche le rechargement par défaut
+            // Vous pouvez ajouter ici votre logique d'authentification (ex: appel API avec fetch)
+            alert('Tentative de connexion simulée. La logique JS doit être implémentée.');
+            console.log('Form submitted.');
+        });
+    </script>
+
 </body>
 </html>
